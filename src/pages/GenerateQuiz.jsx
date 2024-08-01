@@ -1,5 +1,5 @@
-/* eslint-disable no-unused-vars */
-import React, { useState } from "react";
+import { useState } from "react";
+import axios from "axios";
 
 const GenerateQuiz = () => {
   const [contentType, setContentType] = useState("text");
@@ -16,15 +16,60 @@ const GenerateQuiz = () => {
     setPdfFile(e.target.files[0]);
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Create a FormData object
+    const formData = new FormData();
+    formData.append("contentType", contentType);
+    formData.append("schoolLevel", schoolLevel);
+    formData.append("difficulty", difficulty);
+    formData.append("language", language);
+    formData.append("questionType", questionType);
+    formData.append("numQuestions", numQuestions);
+
+    // Add content based on content type
+    if (contentType === "text") {
+      formData.append("textContent", textContent);
+    } else if (contentType === "pdf") {
+      formData.append("pdfFile", pdfFile);
+    } else {
+      formData.append("urlContent", urlContent);
+    }
+
+    try {
+      // Replace 'your-backend-url' with your Django backend URL
+      const response = await axios.post('http://localhost:8000/api/generate-quiz/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log("Quiz generated successfully:", response.data);
+      // Handle success (e.g., show a success message)
+    } catch (error) {
+      console.error("There was an error generating the quiz:", error);
+      // Handle error (e.g., show an error message)
+    }
+  };
+
   return (
     <div className="py-12 max-w-5xl mx-auto">
       <h1 className="font-extrabold lg:text-5xl text-3xl text-center pt-16">
         Generate A Quiz With One Click
       </h1>
-      <p className="text-center py-6 text-sm lg:px-32">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus rem praesentium sapiente ipsa provident iure, deserunt distinctio facilis tenetur dolorem dolores non eos dolor harum odit velit id? Quisquam, illum.</p>
+      <p className="text-center py-6 text-sm lg:px-32">
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatibus
+        rem praesentium sapiente ipsa provident iure, deserunt distinctio
+        facilis tenetur dolorem dolores non eos dolor harum odit velit id?
+        Quisquam, illum.
+      </p>
 
       <div>
-        <div className=" mx-auto mt-6 flex w-full flex-col border rounded-lg bg-white p-8">
+        <form
+          onSubmit={handleSubmit}
+          className="mx-auto mt-6 flex w-full flex-col border rounded-lg bg-white p-8"
+        >
           <div className="mb-4">
             <label
               htmlFor="contentType"
@@ -88,7 +133,7 @@ const GenerateQuiz = () => {
                   PDF File
                 </h2>
                 <p className="mt-2 text-gray-500 tracking-wide">
-                  Upload or darg &amp; drop your file PDF file{" "}
+                  Upload or drag &amp; drop your PDF file{" "}
                 </p>
                 <input
                   onChange={handleFileUpload}
@@ -229,7 +274,7 @@ const GenerateQuiz = () => {
           <button className="rounded border-0 bg-black py-2 text-lg text-white shadow-xl w-fit px-10 focus:outline-none">
             Generate Quiz
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
