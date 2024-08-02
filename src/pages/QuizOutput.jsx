@@ -72,7 +72,7 @@ const QuizOutput = () => {
                 className="inline-flex items-center justify-center gap-1.5 rounded border border-gray-200 bg-white px-5 py-3 text-gray-900 transition hover:text-gray-700 focus:outline-none focus:ring"
                 type="button"
               >
-                <span className="text-sm font-medium"> View Website </span>
+                <span className="text-sm font-medium"> Share Quiz </span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-4 w-4"
@@ -93,7 +93,7 @@ const QuizOutput = () => {
                 className="inline-block rounded bg-indigo-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring"
                 type="button"
               >
-                Create Post
+                Download PDF
               </button>
             </div>
           </div>
