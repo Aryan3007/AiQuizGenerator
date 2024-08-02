@@ -24,7 +24,7 @@ const QuizOutput = () => {
             </p>
           </div>
           <div className="flex flex-col items-start mt-3 space-y-2">
-            {type === "multiple_choice" && options && options.map((option, i) => (
+            {type === "single_select" && options && options.map((option, i) => (
               <div key={i} className="flex items-start">
                 <input type="radio" id={`option-${index}-${i}`} name={`question-${index}`} className="mr-2" />
                 <label htmlFor={`option-${index}-${i}`} className="text-gray-800">{option}</label>
@@ -120,6 +120,14 @@ const QuizOutput = () => {
         )}
       <button className=' bg-blue-600 my-6 rounded-lg text-white hover:bg-blue-400 px-4 py-2'>Submit Quiz</button>
       </div>
+
+      {/* {quizResponse ? (
+        <div>
+          <pre>{JSON.stringify(quizResponse, null, 2)}</pre>
+        </div>
+      ) : (
+        <p>No quiz data available.</p>
+      )} */}
     </div>
   );
 };
