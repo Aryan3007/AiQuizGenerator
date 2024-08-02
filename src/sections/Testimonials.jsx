@@ -5,7 +5,7 @@ const Testimonials = () => {
   return (
   <div>
   <div className="">
-    <section className="max-w-8xl mx-auto w-full lg:px-32 px-10 py-10">
+    <section className="max-w-8xl mx-auto w-full lg:px-32 px-4 py-10">
       <div className="flex items-center justify-center flex-col gap-y-2 py-5">
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold max-w-md mx-auto text-center text-black">Here's what our
           <span className="text-[#415ec9]"> customers</span> have to say
