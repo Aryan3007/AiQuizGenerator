@@ -1,55 +1,70 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const GenerateQuiz = () => {
+  const navigate = useNavigate();
   const [contentType, setContentType] = useState("text");
   const [schoolLevel, setSchoolLevel] = useState("primary");
   const [difficulty, setDifficulty] = useState("easy");
-  const [language, setLanguage] = useState("English");
+  const [language, setLanguage] = useState("english");
   const [questionType, setQuestionType] = useState("true_false");
   const [textContent, setTextContent] = useState("");
   const [pdfFile, setPdfFile] = useState(null);
   const [urlContent, setUrlContent] = useState("");
   const [numQuestions, setNumQuestions] = useState(10);
+  const [quizResponse, setQuizResponse] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false); // New loading state
 
   const handleFileUpload = (e) => {
     setPdfFile(e.target.files[0]);
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Create a FormData object
-    const formData = new FormData();
-    formData.append("contentType", contentType);
-    formData.append("schoolLevel", schoolLevel);
-    formData.append("difficulty", difficulty);
-    formData.append("language", language);
-    formData.append("questionType", questionType);
-    formData.append("numQuestions", numQuestions);
-
-    // Add content based on content type
-    if (contentType === "text") {
-      formData.append("textContent", textContent);
-    } else if (contentType === "pdf") {
-      formData.append("pdfFile", pdfFile);
-    } else {
-      formData.append("urlContent", urlContent);
+    if (
+      !contentType ||
+      !schoolLevel ||
+      !difficulty ||
+      !language ||
+      !questionType ||
+      (!textContent && !pdfFile && !urlContent)
+    ) {
+      setError("Please fill in all required fields.");
+      return;
     }
 
-    try {
-      // Replace 'your-backend-url' with your Django backend URL
-      const response = await axios.post('http://localhost:8000/api/generate-quiz/', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+    setQuizResponse(null);
+    setError(null);
+    setLoading(true);
 
-      console.log("Quiz generated successfully:", response.data);
-      // Handle success (e.g., show a success message)
+    const formData = new FormData();
+    formData.append("content_type", contentType);
+    formData.append(
+      "content_file",
+      contentType === "text" ? textContent : pdfFile || urlContent
+    );
+    formData.append("num_questions", numQuestions.toString());
+    formData.append("subject", textContent);
+    formData.append("language", language);
+    formData.append("schooling_level", schoolLevel || "primary");
+    formData.append("level", difficulty || "medium");
+    formData.append("question_types", questionType || "multiple_choice");
+
+    try {
+      const response = await axios.post(
+        "https://quizzer-backend-w4q1.onrender.com/apiV1/quiz/generate-quiz-questions/",
+        formData
+      );
+
+      setQuizResponse(response.data);
+      navigate("/quiz-output", { state: { quizResponse: response.data } });
     } catch (error) {
-      console.error("There was an error generating the quiz:", error);
-      // Handle error (e.g., show an error message)
+      setError(error.response ? error.response.data : "An error occurred.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,6 +85,7 @@ const GenerateQuiz = () => {
           onSubmit={handleSubmit}
           className="mx-auto mt-6 flex w-full flex-col border rounded-lg bg-white p-8"
         >
+          {/* Content Type Selector */}
           <div className="mb-4">
             <label
               htmlFor="contentType"
@@ -91,6 +107,7 @@ const GenerateQuiz = () => {
             </select>
           </div>
 
+          {/* Conditional Content Input */}
           {contentType === "text" && (
             <div className="mb-4">
               <label
@@ -166,6 +183,7 @@ const GenerateQuiz = () => {
             </div>
           )}
 
+          {/* Other Form Fields */}
           <div className="mb-4">
             <label
               htmlFor="schoolLevel"
@@ -215,14 +233,13 @@ const GenerateQuiz = () => {
             <select
               id="difficulty"
               name="difficulty"
-              className="w-full  h-12 rounded border border-gray-300 bg-white py-1 px-3 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+              className="w-full h-12 rounded border border-gray-300 bg-white py-1 px-3 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value)}
             >
               <option value="easy">Easy</option>
               <option value="medium">Medium</option>
               <option value="hard">Hard</option>
-              <option value="expert">Expert</option>
             </select>
           </div>
 
@@ -241,7 +258,6 @@ const GenerateQuiz = () => {
               onChange={(e) => setLanguage(e.target.value)}
             >
               <option value="English">English</option>
-              <option value="Hindi">Hindi</option>
               <option value="Spanish">Spanish</option>
               <option value="French">French</option>
               <option value="German">German</option>
@@ -259,22 +275,45 @@ const GenerateQuiz = () => {
             <select
               id="questionType"
               name="questionType"
-              className="w-full rounded border border-gray-300 bg-white py-1 px-3 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+              className="w-full h-12 rounded border border-gray-300 bg-white py-1 px-3 text-base leading-8 text-gray-700 outline-none transition-colors duration-200 ease-in-out focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
               value={questionType}
               onChange={(e) => setQuestionType(e.target.value)}
             >
               <option value="true_false">True/False</option>
-              <option value="numeric">Numeric</option>
-              <option value="theory">Theory</option>
-              <option value="multiple_select">Multiple Select</option>
-              <option value="single_select">Single Select</option>
+              <option value="multiple_choice">Multiple Choice</option>
+              <option value="short_answer">Short Answer</option>
             </select>
           </div>
 
-          <button className="rounded border-0 bg-black py-2 text-lg text-white shadow-xl w-fit px-10 focus:outline-none">
-            Generate Quiz
+          <button
+            type="submit"
+            className="w-full h-12 rounded bg-indigo-500 text-white hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:ring-offset-2"
+            disabled={loading} // Disable the button while loading
+          >
+            {loading ? "Generating Quiz..." : "Generate Quiz"}{" "}
           </button>
         </form>
+
+        {error && (
+          <div className="mt-8 p-4 bg-red-100 text-red-800 rounded-lg">
+            <h3 className="text-lg font-semibold">Error:</h3>
+            <p className="mt-4">{error}</p>
+          </div>
+        )}
+
+        {loading && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+           
+              <div className="w-20 h-20 border-4 border-transparent text-blue-400 text-4xl animate-spin flex items-center justify-center border-t-blue-400 rounded-full">
+                <div className="w-16 h-16 border-4 border-transparent text-red-400 text-2xl animate-spin flex items-center justify-center border-t-red-400 rounded-full" />
+              </div>
+     
+
+            <div className="text-white mx-4 text-2xl font-semibold">
+              Generating Quiz...
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
